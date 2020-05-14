@@ -2,17 +2,17 @@ var express = require('express');
 var router = express.Router();
 var {user} = require('../db/mongoose.js');
 
-//authentication for login
+//login
 router.post('/login', function(req, res, next) {
     user.findOne({email: req.body.email}).then(document => {
         if (document.password == req.body.password) {
-            res.send(true);
+            res.send({login: true, username: document.username});
         } else {
-            res.send(false);
+            res.send({login: false, username: ''});
         }
     }).catch(err => {
-        res.status(404).send('Error')
-    })
+        res.status(404).send('Error');
+    });
 });
 
 //create new user
@@ -24,10 +24,10 @@ router.post('/', function(req, res, next) {
     };
     const newUser = new user(info);
     newUser.save().then(() => {
-        res.send('Successful');
+        res.send('Success');
     }).catch(err => {
-        res.status(404).send('Error')
-    })
+        res.status(404).send('Error');
+    });
 });
 
 module.exports = router;
