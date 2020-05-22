@@ -52,9 +52,27 @@ const goalSchema = new Schema({
     }
 })
 
+const watchlistSchema = mongoose.Schema({
+    title: {
+        type: String,
+        required: true
+    },
+    stocks: {
+        type: Array,
+        required: true
+    },
+    userId: {
+        type: mongoose.Types.ObjectId,
+        required: true
+    }
+})
+
 var users = mongoose.model('user', userSchema);
 var goals = mongoose.model('goal', goalSchema);
+var watchlists = mongoose.model('watchlist', watchlistSchema);
 
 module.exports = {
-    user: users
+    user: users,
+    goals: goals,
+    watchlists: watchlists
 }
