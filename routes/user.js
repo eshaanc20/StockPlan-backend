@@ -1,16 +1,19 @@
 var express = require('express');
 var router = express.Router();
 var {User} = require('../db/mongoose.js');
-var bcrypt = require('bcrypt.js');
+var bcrypt = require('bcryptjs');
+var jwt = require('jsonwebtoken');
 
 //login
 router.post('/login', function(req, res, next) {
     try {
         const user = await User.findOne({email: req.body.email});
-        if (user.password == req.body.password) {
-            res.send({login: true, username: user.username});
+        const passwordMatch = await bcrypt.compare(req.password, user.password);
+        if (passwordMatch) {
+            const newToken = jwt.sign({'id': user._id}, 'stockplanbackend');
+            res.send({login: true, token: newToken});
         } else {
-            res.send({login: false, username: ''});
+            res.send({login: false, token: ''});
         }
     } catch {
         res.status(404).send('Error');
