@@ -3,15 +3,16 @@ var router = express.Router();
 var {User} = require('../db/mongoose.js');
 var bcrypt = require('bcryptjs');
 var jwt = require('jsonwebtoken');
+var authentication = require('../middleware/authentication.js');
 
 //login
 router.post('/login', function(req, res, next) {
     try {
         const user = await User.findOne({email: req.body.email});
-        const passwordMatch = await bcrypt.compare(req.password, user.password);
+        const passwordMatch = await bcrypt.compare(req.body.password, user.password);
         if (passwordMatch) {
             const newToken = jwt.sign({'id': user._id}, 'stockplanbackend');
-            res.send({login: true, token: newToken});
+            res.send({...user, login: true, token: newToken});
         } else {
             res.send({login: false, token: ''});
         }
@@ -21,13 +22,13 @@ router.post('/login', function(req, res, next) {
 });
 
 //create new user
-router.post('/', function(req, res, next) {
+router.post('/new', function(req, res, next) {
     const info = {
         ...req.body,
     };
     try {
         const newUser = new User(info);
-        newUser.password = await bcrypt.hash(req.password, 5);
+        newUser.password = await bcrypt.hash(req.body.password, 5);
         await newUser.save()
         res.send('Success');
     } catch {
