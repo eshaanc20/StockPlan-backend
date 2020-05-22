@@ -72,7 +72,7 @@ var goals = mongoose.model('goal', goalSchema);
 var watchlists = mongoose.model('watchlist', watchlistSchema);
 
 module.exports = {
-    user: users,
-    goals: goals,
-    watchlists: watchlists
+    User: users,
+    Goals: goals,
+    Watchlists: watchlists
 }
