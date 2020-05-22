@@ -6,16 +6,54 @@ mongoose.connect('', {
     useUnifiedTopology: true
 });
 
-const dataFormat = new Schema({
-    firstName: String,
-    lastName: String,
-    email: String,
-    password: String,
-    stocks: Array,
-    goals: Array
+const userSchema = new Schema({
+    firstName: {
+        type: String,
+        required: true,
+    },
+    lastName: {
+        type: String,
+        required: true,
+    },
+    email: {
+        type: String,
+        required: true,
+    },
+    password: {
+        type: String,
+        required: true,
+    },
 });
 
-var users = mongoose.model('user', dataFormat);
+const goalSchema = new Schema({
+    title: {
+        type: String,
+        required: true
+    },
+    description: {
+        type: String,
+        required: true
+    },
+    stock: {
+        type: String,
+        required: true
+    },
+    goal: {
+        type: Array,
+        required: true
+    },
+    validUntil: {
+        type: String,
+        required: true
+    },
+    userId: {
+        type: mongoose.Types.ObjectId,
+        required: true
+    }
+})
+
+var users = mongoose.model('user', userSchema);
+var goals = mongoose.model('goal', goalSchema);
 
 module.exports = {
     user: users
