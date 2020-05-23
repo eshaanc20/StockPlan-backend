@@ -68,7 +68,7 @@ const watchlistSchema = mongoose.Schema({
 });
 
 userSchema.virtual('goals', {
-    ref: 'Task',
+    ref: 'goal',
     localField: '_id',
     foreignField: 'userId'
 });

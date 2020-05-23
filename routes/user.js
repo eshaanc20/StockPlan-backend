@@ -3,7 +3,6 @@ var router = express.Router();
 var {User} = require('../db/mongoose.js');
 var bcrypt = require('bcryptjs');
 var jwt = require('jsonwebtoken');
-var authentication = require('../middleware/authentication.js');
 
 //login
 router.post('/login', function(req, res, next) {

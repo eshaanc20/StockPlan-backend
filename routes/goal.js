@@ -50,4 +50,6 @@ router.delete('/', authentication, function(req, res, next) {
     }
 });
 
+module.exports = router;
+
 
