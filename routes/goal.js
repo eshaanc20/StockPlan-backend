@@ -7,7 +7,7 @@ var jwt = require('jsonwebtoken');
 var authentication = require('../middleware/authentication.js');
 
 //get all user goals
-router.get('/user', authentication, function(req, res, next) {
+router.get('/user', authentication, async function(req, res, next) {
     try {
         await req.user.populate('goals').execPopulate();
         res.send(req.user.goals);
@@ -17,7 +17,7 @@ router.get('/user', authentication, function(req, res, next) {
 });
 
 //get a goal
-router.get('/:id', authentication, function(req, res, next) {
+router.get('/:id', authentication, async function(req, res, next) {
     try {
         const oneGoal = await Goal.findOne({_id: req.params.id});
         return oneGoal;
@@ -27,7 +27,7 @@ router.get('/:id', authentication, function(req, res, next) {
 });
 
 //add a new goal
-router.post('/', authentication, function(req, res, next) {
+router.post('/', authentication, async function(req, res, next) {
     try {
         const goalInfo = {
             ...req.body,
@@ -41,7 +41,7 @@ router.post('/', authentication, function(req, res, next) {
 });
 
 //delete a goal
-router.delete('/', authentication, function(req, res, next) {
+router.delete('/', authentication, async function(req, res, next) {
     try {
         await Goal.deleteOne({_id: req.body.id});
         res.send({requestStatus: true});

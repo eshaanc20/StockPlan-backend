@@ -57,4 +57,14 @@ router.post('/', authentication, async function(req, res, next) {
     }
 });
 
+//get a watchlist
+router.post('/:id', authentication, async function(req, res, next) {
+    try {
+        const listInfo = await Watchlist.findOne({_id: req.params.id, userId: req.user._id});
+        res.send({requestStatus: true});
+    } catch {
+        res.status(404).send({requestStatus: false});
+    }
+});
+
 module.exports = router;
