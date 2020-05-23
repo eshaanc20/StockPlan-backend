@@ -53,7 +53,7 @@ const goalSchema = new Schema({
 });
 
 const watchlistSchema = mongoose.Schema({
-    title: {
+    name: {
         type: String,
         required: true
     },
