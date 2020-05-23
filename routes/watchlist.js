@@ -42,7 +42,7 @@ router.get('/information', authentication, async function(req, res, next) {
 });
 
 //create new watchlist
-router.get('/user', authentication, async function(req, res, next) {
+router.post('/', authentication, async function(req, res, next) {
     try {
         const info = {
             title: req.body.name,
