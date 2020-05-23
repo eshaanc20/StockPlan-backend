@@ -27,13 +27,23 @@ router.get('/:id', authentication, function(req, res, next) {
 });
 
 //add a new goal
-router.post('/new', authentication, function(req, res, next) {
+router.post('/', authentication, function(req, res, next) {
     try {
         const goalInfo = {
             ...req.body,
         }
         const newGoal = new Goal(goalInfo);
         await newGoal.save()
+        res.send({requestStatus: true});
+    } catch {
+        res.status(404).send({requestStatus: false});
+    }
+});
+
+//delete a goal
+router.delete('/', authentication, function(req, res, next) {
+    try {
+        await Goal.deleteOne({_id: req.body.id});
         res.send({requestStatus: true});
     } catch {
         res.status(404).send({requestStatus: false});
