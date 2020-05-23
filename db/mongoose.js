@@ -50,7 +50,7 @@ const goalSchema = new Schema({
         type: mongoose.Types.ObjectId,
         required: true
     }
-})
+});
 
 const watchlistSchema = mongoose.Schema({
     title: {
@@ -65,7 +65,13 @@ const watchlistSchema = mongoose.Schema({
         type: mongoose.Types.ObjectId,
         required: true
     }
-})
+});
+
+userSchema.virtual('goals', {
+    ref: 'Task',
+    localField: '_id',
+    foreignField: 'userId'
+});
 
 var users = mongoose.model('user', userSchema);
 var goals = mongoose.model('goal', goalSchema);
@@ -73,6 +79,6 @@ var watchlists = mongoose.model('watchlist', watchlistSchema);
 
 module.exports = {
     User: users,
-    Goals: goals,
-    Watchlists: watchlists
+    Goal: goals,
+    Watchlist: watchlists
 }

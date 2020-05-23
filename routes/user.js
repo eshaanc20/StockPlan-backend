@@ -12,12 +12,12 @@ router.post('/login', function(req, res, next) {
         const passwordMatch = await bcrypt.compare(req.body.password, user.password);
         if (passwordMatch) {
             const newToken = jwt.sign({'id': user._id}, 'stockplanbackend');
-            res.send({...user, login: true, token: newToken});
+            res.send({...user, login: true, token: newToken, requestStatus: true});
         } else {
-            res.send({login: false, token: ''});
+            res.send({login: false, token: '', requestStatus: true});
         }
     } catch {
-        res.status(404).send('Error');
+        res.status(404).send({requestStatus: false});
     }
 });
 
@@ -30,9 +30,9 @@ router.post('/new', function(req, res, next) {
         const newUser = new User(info);
         newUser.password = await bcrypt.hash(req.body.password, 5);
         await newUser.save()
-        res.send('Success');
+        res.send({requestStatus: true});
     } catch {
-        res.status(404).send('Error');
+        res.status(404).send({requestStatus: false});
     }
 });
 
