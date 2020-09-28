@@ -5,13 +5,19 @@ var bcrypt = require('bcryptjs');
 var jwt = require('jsonwebtoken');
 
 //login
-router.post('/login', async function(req, res, next) {
+router.get('/login', async function(req, res, next) {
     try {
         const user = await User.findOne({email: req.body.email});
         const passwordMatch = await bcrypt.compare(req.body.password, user.password);
         if (passwordMatch) {
             const newToken = jwt.sign({'id': user._id}, 'stockplanbackend');
-            res.send({...user, login: true, token: newToken, requestStatus: true});
+            res.send({
+                firstName: user.firstName, 
+                lastName: user.lastName,
+                email: user.email,
+                login: true, 
+                token: newToken, 
+                requestStatus: true});
         } else {
             res.send({login: false, token: '', requestStatus: true});
         }

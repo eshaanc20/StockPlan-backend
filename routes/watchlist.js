@@ -9,7 +9,7 @@ var authentication = require('../middleware/authentication.js');
 var axios = require('axios');
 
 //get all user watchlists
-router.get('/user', authentication, async function(req, res, next) {
+router.get('/all', authentication, async function(req, res, next) {
     try {
         const watchlists = await Watchlist.find({userId: req.user._id});
         res.send({allLists: watchlists});
@@ -24,17 +24,19 @@ router.get('/information', authentication, async function(req, res, next) {
         const watchlist = await Watchlist.findOne({_id: req.body.listId, userId: req.user._id});
         let responses = [];
         watchlist.stocks.forEach((stock) => {
-            try {
-                const response = await axios.get('https://finnhub.io/api/v1/quote?symbol=' + stock + '&token=br1ie2frh5reisn53n3g');
-                const info = {
-                    symbol: stock,
-                    ...response.data,
-                }
-                responses.push(response.data);
-            } catch (error) {
-                console.log(error);
+                axios.get('https://finnhub.io/api/v1/quote?symbol=' + stock + '')
+                    .then(response => {
+                        const info = {
+                            symbol: stock,
+                            ...response.data,
+                        }
+                        responses.push(response.data);
+                    })
+                    .catch(error => {
+                        console.log(error);
+                    })
             }
-        });
+        );
         res.send({name: watchlist.name, list: responses});
     } catch {
         res.status(404).send({requestStatus: false});
@@ -42,25 +44,32 @@ router.get('/information', authentication, async function(req, res, next) {
 });
 
 //create new watchlist
-router.post('/', authentication, async function(req, res, next) {
+router.post('/new', authentication, async function(req, res, next) {
     try {
         const info = {
-            title: req.body.name,
+            name: req.body.name,
             stocks: [],
             userId: req.user._id
         }
-        const newWatchlist = new Watchlist(info);
-        await newWatchlist.save();
-        res.send({requestStatus: true});
+        const watchlistExists = await Watchlist.exists({name: req.body.name});
+        if (watchlistExists) {
+            res.status(200).send({requestStatus: false});
+        } else {
+            const newWatchlist = new Watchlist(info);
+            await newWatchlist.save();
+            res.send({requestStatus: true});
+        }
     } catch {
         res.status(404).send({requestStatus: false});
     }
 });
 
-//get a watchlist
+//add to watchlist
 router.post('/:id', authentication, async function(req, res, next) {
     try {
-        const listInfo = await Watchlist.findOne({_id: req.params.id, userId: req.user._id});
+        const list = await Watchlist.findOne({_id: req.params.id, userId: req.user._id});
+        const stockList = [...list.stocks, req.body.newStock];
+        const newList = await Watchlist.updateOne({_id: req.params.id, userId: req.user._id}, {stocks: stockList});
         res.send({requestStatus: true});
     } catch {
         res.status(404).send({requestStatus: false});
