@@ -23,22 +23,19 @@ router.get('/information', authentication, async function(req, res, next) {
     try {
         const watchlist = await Watchlist.findOne({_id: req.body.listId, userId: req.user._id});
         let responses = [];
-        watchlist.stocks.forEach((stock) => {
-                axios.get('https://finnhub.io/api/v1/quote?symbol=' + stock + '')
-                    .then(response => {
-                        const info = {
-                            symbol: stock,
-                            ...response.data,
-                        }
-                        responses.push(response.data);
-                    })
-                    .catch(error => {
-                        console.log(error);
-                    })
+        for (stock of watchlist.stocks) {   
+            let response = await axios.get('https://finnhub.io/api/v1/quote?symbol=' + stock + '&token=btpsg2n48v6rdq37lt60');
+            const info = {
+                symbol: stock,
+                current: response.data.c,
+                high: response.data.h,
+                low: response.data.l,
             }
-        );
-        res.send({name: watchlist.name, list: responses});
-    } catch {
+            responses.push(info);
+        };
+        res.send({name: watchlist.name, list: responses, length: watchlist.stocks.length});
+    } catch (error) {
+        console.log(error);
         res.status(404).send({requestStatus: false});
     }
 });
