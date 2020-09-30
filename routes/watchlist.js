@@ -73,4 +73,14 @@ router.post('/:id', authentication, async function(req, res, next) {
     }
 });
 
+//delete a watchlist
+router.delete('/:id', authentication, async function(req, res, next) {
+    try {
+        await Watchlist.deleteOne({listId: req.params.id});
+        res.send({requestStatus: true});
+    } catch {
+        res.status(404).send({requestStatus: false});
+    }
+});
+
 module.exports = router;
