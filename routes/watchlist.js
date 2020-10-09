@@ -12,16 +12,17 @@ var axios = require('axios');
 router.get('/all', authentication, async function(req, res, next) {
     try {
         const watchlists = await Watchlist.find({userId: req.user._id});
-        res.send({allLists: watchlists});
+        const stockLists = [...watchlists]
+        res.status(200).send({allLists: stockLists});
     } catch {
         res.status(404).send({requestStatus: false});
     }
 });
 
 //get watchlist information
-router.get('/information', authentication, async function(req, res, next) {
+router.get('/:id', authentication, async function(req, res, next) {
     try {
-        const watchlist = await Watchlist.findOne({_id: req.body.listId, userId: req.user._id});
+        const watchlist = await Watchlist.findOne({listNumber: parseInt(req.params.id), userId: req.user._id});
         let responses = [];
         for (stock of watchlist.stocks) {   
             let response = await axios.get('https://finnhub.io/api/v1/quote?symbol=' + stock + '&token=btpsg2n48v6rdq37lt60');
@@ -33,7 +34,7 @@ router.get('/information', authentication, async function(req, res, next) {
             }
             responses.push(info);
         };
-        res.send({name: watchlist.name, list: responses, length: watchlist.stocks.length});
+        res.send({name: watchlist.name, stockDetail: responses, length: watchlist.stocks.length});
     } catch (error) {
         console.log(error);
         res.status(404).send({requestStatus: false});
@@ -43,10 +44,20 @@ router.get('/information', authentication, async function(req, res, next) {
 //create new watchlist
 router.post('/new', authentication, async function(req, res, next) {
     try {
+        const watchlists = await Watchlist.find({userId: req.user._id});
+        const stockLists = [...watchlists]
+        let newListNumber = 0;
+        stockLists.forEach(element => {
+            if (newListNumber < element.listNumber) {
+                newListNumber = element.listNumber
+            }
+        })
+        newListNumber = listNumber + 1;
         const info = {
-            name: req.body.name,
+            name: req.body.listName,
             stocks: [],
-            userId: req.user._id
+            userId: req.user._id,
+            listNumber: newListNumber
         }
         const watchlistExists = await Watchlist.exists({name: req.body.name});
         if (watchlistExists) {
@@ -54,7 +65,7 @@ router.post('/new', authentication, async function(req, res, next) {
         } else {
             const newWatchlist = new Watchlist(info);
             await newWatchlist.save();
-            res.send({requestStatus: true});
+            res.status(200).send({requestStatus: true});
         }
     } catch {
         res.status(404).send({requestStatus: false});
