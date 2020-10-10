@@ -26,11 +26,16 @@ router.get('/:id', authentication, async function(req, res, next) {
         let responses = [];
         for (stock of watchlist.stocks) {   
             let response = await axios.get('https://finnhub.io/api/v1/quote?symbol=' + stock + '&token=btpsg2n48v6rdq37lt60');
+            let changeAmount = (Math.abs(response.data.c - response.data.o))/response.data.o;
+            let changeDirection = (response.data.c - response.data.o) > 0? "increase": "decrease";
             const info = {
                 symbol: stock,
                 current: response.data.c,
+                open: response.data.o,
                 high: response.data.h,
                 low: response.data.l,
+                change: changeDirection,
+                percentChange: changeAmount
             }
             responses.push(info);
         };
