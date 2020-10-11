@@ -23,23 +23,33 @@ router.get('/all', authentication, async function(req, res, next) {
 router.get('/:id', authentication, async function(req, res, next) {
     try {
         const watchlist = await Watchlist.findOne({listNumber: parseInt(req.params.id), userId: req.user._id});
-        let responses = [];
+        let stocks = [];
         for (stock of watchlist.stocks) {   
             let response = await axios.get('https://finnhub.io/api/v1/quote?symbol=' + stock + '&token=btpsg2n48v6rdq37lt60');
-            let changeAmount = (Math.abs(response.data.c - response.data.o))/response.data.o;
+            let changeAmount = (Math.round(((Math.abs(response.data.c - response.data.pc))/response.data.pc) * 10000))/100;
+            let amountDifference = Math.abs(response.data.c - response.data.pc);
+            amountDifference = (Math.round(amountDifference * 100))/100
             let changeDirection = (response.data.c - response.data.o) > 0? "increase": "decrease";
+            let moreDataResponse = await axios.get('https://finnhub.io/api/v1/stock/profile2?symbol=' + stock + '&token=btpsg2n48v6rdq37lt60')
             const info = {
                 symbol: stock,
                 current: response.data.c,
                 open: response.data.o,
                 high: response.data.h,
                 low: response.data.l,
+                previousClosePrice: response.data.pc,
                 change: changeDirection,
-                percentChange: changeAmount
+                percentChange: changeAmount,
+                amountChange: amountDifference,
+                name: moreDataResponse.data.name,
+                currency: moreDataResponse.data.currency,
+                exchange: moreDataResponse.data.exchange,
+                marketCap: moreDataResponse.data.marketCapitalization,
+                outstanding: moreDataResponse.data.shareOutstanding,
             }
-            responses.push(info);
+            stocks.push(info);
         };
-        res.send({name: watchlist.name, stockDetail: responses, length: watchlist.stocks.length});
+        res.send({name: watchlist.name, stockDetail: stocks, length: watchlist.stocks.length});
     } catch (error) {
         console.log(error);
         res.status(404).send({requestStatus: false});
