@@ -26,11 +26,12 @@ router.get('/:id', authentication, async function(req, res, next) {
         let stocks = [];
         for (stock of watchlist.stocks) {   
             let response = await axios.get('https://finnhub.io/api/v1/quote?symbol=' + stock + '&token=btpsg2n48v6rdq37lt60');
-            let changeAmount = (Math.round(((Math.abs(response.data.c - response.data.pc))/response.data.pc) * 10000))/100;
+            let changeAmount = (Math.abs(response.data.c - response.data.pc))/response.data.pc;
+            changeAmount = (Math.round(changeAmount * 10000))/100
             let amountDifference = Math.abs(response.data.c - response.data.pc);
             amountDifference = (Math.round(amountDifference * 100))/100
             let changeDirection = (response.data.c - response.data.o) > 0? "increase": "decrease";
-            let moreDataResponse = await axios.get('https://finnhub.io/api/v1/stock/profile2?symbol=' + stock + '&token=btpsg2n48v6rdq37lt60')
+            let moreDataResponse = await axios.get('https://finnhub.io/api/v1/stock/metric?symbol=' + stock + '&metric=all&token=btpsg2n48v6rdq37lt60');
             const info = {
                 symbol: stock,
                 current: response.data.c,
@@ -41,11 +42,14 @@ router.get('/:id', authentication, async function(req, res, next) {
                 change: changeDirection,
                 percentChange: changeAmount,
                 amountChange: amountDifference,
-                name: moreDataResponse.data.name,
-                currency: moreDataResponse.data.currency,
-                exchange: moreDataResponse.data.exchange,
-                marketCap: moreDataResponse.data.marketCapitalization,
-                outstanding: moreDataResponse.data.shareOutstanding,
+                high52Week: moreDataResponse.data.metric['52WeekHigh'],
+                low52Week: moreDataResponse.data.metric['52WeekLow'],
+                marketCap: moreDataResponse.data.metric.marketCapitalization,
+                eps: moreDataResponse.data.metric.epsNormalizedAnnual,
+                epsGrowth: moreDataResponse.data.metric.epsGrowth5Y,
+                dividendYield: moreDataResponse.data.metric.dividendYieldIndicatedAnnual,
+                profitEarningRatio: moreDataResponse.data.metric.peNormalizedAnnual,
+                netProfitMargin: moreDataResponse.data.metric.netProfitMarginAnnual
             }
             stocks.push(info);
         };
