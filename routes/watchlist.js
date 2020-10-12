@@ -33,6 +33,7 @@ router.get('/:id', authentication, async function(req, res, next) {
             amountDifference = (Math.round(amountDifference * 100))/100
             let changeDirection = (response.data.c - response.data.o) > 0? "increase": "decrease";
             let moreDataResponse = await axios.get('https://finnhub.io/api/v1/stock/metric?symbol=' + stock + '&metric=all&token=btpsg2n48v6rdq37lt60');
+            let openDaily = Math.round(response.data.h * 100) / 100;
             let highDaily = Math.round(response.data.h * 100) / 100;
             let lowDaily = Math.round(response.data.l * 100) / 100;
             let high52WeekPrice = Math.round(moreDataResponse.data.metric['52WeekHigh'] * 100) / 100;
@@ -49,7 +50,7 @@ router.get('/:id', authentication, async function(req, res, next) {
             const info = {
                 symbol: stock,
                 current: response.data.c,
-                open: response.data.o,
+                open: openDaily,
                 high: highDaily,
                 low: lowDaily,
                 previousClosePrice: response.data.pc,
@@ -72,6 +73,7 @@ router.get('/:id', authentication, async function(req, res, next) {
             overallChange = "decrease"
         }
         overallChangeAmount = Math.abs(overallChangeAmount);
+        overallChangeAmount = (Math.round(overallChangeAmount * 100)) / 100
         res.send({
             name: watchlist.name, 
             stockDetail: stocks, 
@@ -118,9 +120,9 @@ router.post('/new', authentication, async function(req, res, next) {
 //add to watchlist
 router.post('/:id', authentication, async function(req, res, next) {
     try {
-        const list = await Watchlist.findOne({listId: req.params.id, userId: req.user._id});
-        const stockList = [...list.stocks, req.body.newStock];
-        const newList = await Watchlist.updateOne({_id: req.params.id, userId: req.user._id}, {stocks: stockList});
+        const list = await Watchlist.findOne({listNumber: req.params.id, userId: req.user._id});
+        const stockList = [...list.stocks, req.body.stockSymbol];
+        const newList = await Watchlist.updateOne({listNumber: req.params.id, userId: req.user._id}, {stocks: stockList});
         res.send({requestStatus: true});
     } catch {
         res.status(404).send({requestStatus: false});

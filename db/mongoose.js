@@ -66,7 +66,7 @@ const watchlistSchema = mongoose.Schema({
         required: true
     },
     listNumber: {
-        type: String,
+        type: Number,
         required: true
     }
 });
