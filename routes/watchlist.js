@@ -13,7 +13,7 @@ router.get('/all', authentication, async function(req, res, next) {
     try {
         const watchlists = await Watchlist.find({userId: req.user._id});
         const stockLists = [...watchlists]
-        res.status(200).send({allLists: stockLists});
+        res.send({allLists: stockLists});
     } catch {
         res.status(404).send({requestStatus: false});
     }
@@ -24,6 +24,7 @@ router.get('/:id', authentication, async function(req, res, next) {
     try {
         const watchlist = await Watchlist.findOne({listNumber: parseInt(req.params.id), userId: req.user._id});
         let stocks = [];
+        let overallChangeAmount = 0;
         for (stock of watchlist.stocks) {   
             let response = await axios.get('https://finnhub.io/api/v1/quote?symbol=' + stock + '&token=btpsg2n48v6rdq37lt60');
             let changeAmount = (Math.abs(response.data.c - response.data.pc))/response.data.pc;
@@ -38,10 +39,13 @@ router.get('/:id', authentication, async function(req, res, next) {
             let low52WeekPrice = Math.round(moreDataResponse.data.metric['52WeekLow'] * 100) / 100;
             let marketValue = moreDataResponse.data.metric.marketCapitalization / 1000;
             let epsNumber = Math.round(moreDataResponse.data.metric.epsNormalizedAnnual * 100) / 100;
-            let dividentYieldNumber = Math.round(moreDataResponse.data.metric.dividendYieldIndicatedAnnual * 100) / 100;
-            let epsGrowthNumber = Math.round(moreDataResponse.data.metric.epsGrowth5Y * 100) / 100;
+            let dividendYieldNumber = Math.round(moreDataResponse.data.metric.dividendYieldIndicatedAnnual * 100) / 100;
             let profitEarningNumber = Math.round(moreDataResponse.data.metric.peNormalizedAnnual * 100) / 100;
-            let netMarginNumber = Math.round(moreDataResponse.data.metric.netProfitMarginAnnual * 100) / 100;
+            if (changeDirection === "increase") {
+                overallChangeAmount += changeAmount;
+            } else {
+                overallChangeAmount -= changeAmount;
+            }
             const info = {
                 symbol: stock,
                 current: response.data.c,
@@ -56,14 +60,24 @@ router.get('/:id', authentication, async function(req, res, next) {
                 low52Week: low52WeekPrice,
                 marketCap: marketValue,
                 eps: epsNumber,
-                epsGrowth: epsGrowthNumber,
-                dividendYield: dividentYieldNumber,
+                dividendYield: dividendYieldNumber,
                 profitEarningRatio: profitEarningNumber,
-                netProfitMargin: netMarginNumber
             }
             stocks.push(info);
         };
-        res.send({name: watchlist.name, stockDetail: stocks, length: watchlist.stocks.length});
+        let overallChange;
+        if (overallChangeAmount > 0) {
+            overallChange = "increase"
+        } else {
+            overallChange = "decrease"
+        }
+        overallChangeAmount = Math.abs(overallChangeAmount);
+        res.send({
+            name: watchlist.name, 
+            stockDetail: stocks, 
+            totalChange: overallChange, 
+            totalChangeAmount: overallChangeAmount,
+            length: watchlist.stocks.length});
     } catch (error) {
         console.log(error);
         res.status(404).send({requestStatus: false});
@@ -90,11 +104,11 @@ router.post('/new', authentication, async function(req, res, next) {
         }
         const watchlistExists = await Watchlist.exists({name: req.body.name});
         if (watchlistExists) {
-            res.status(200).send({requestStatus: false});
+            res.send({requestStatus: false});
         } else {
             const newWatchlist = new Watchlist(info);
             await newWatchlist.save();
-            res.status(200).send({requestStatus: true});
+            res.send({requestStatus: true});
         }
     } catch {
         res.status(404).send({requestStatus: false});
@@ -104,7 +118,7 @@ router.post('/new', authentication, async function(req, res, next) {
 //add to watchlist
 router.post('/:id', authentication, async function(req, res, next) {
     try {
-        const list = await Watchlist.findOne({_id: req.params.id, userId: req.user._id});
+        const list = await Watchlist.findOne({listId: req.params.id, userId: req.user._id});
         const stockList = [...list.stocks, req.body.newStock];
         const newList = await Watchlist.updateOne({_id: req.params.id, userId: req.user._id}, {stocks: stockList});
         res.send({requestStatus: true});

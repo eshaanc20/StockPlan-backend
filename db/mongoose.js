@@ -64,6 +64,10 @@ const watchlistSchema = mongoose.Schema({
     userId: {
         type: mongoose.Types.ObjectId,
         required: true
+    },
+    listId: {
+        type: String,
+        required: true
     }
 });
 
