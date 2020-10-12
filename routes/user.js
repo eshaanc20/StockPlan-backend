@@ -11,7 +11,7 @@ router.post('/login', async function(req, res, next) {
         const passwordMatch = await bcrypt.compare(req.body.password, user.password);
         if (passwordMatch) {
             const new_token = jwt.sign({'id': user._id}, 'stockplanbackend');
-            res.send({
+            res.status(200).send({
                 firstName: user.firstName, 
                 lastName: user.lastName,
                 email: user.email,
@@ -23,7 +23,7 @@ router.post('/login', async function(req, res, next) {
             res.send({login: false, token: '', requestStatus: true});
         }
     } catch {
-        res.status(404).send({requestStatus: false});
+        res.send({requestStatus: false});
     }
 });
 
