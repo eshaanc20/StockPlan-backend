@@ -42,6 +42,7 @@ router.get('/:id', authentication, async function(req, res, next) {
             let epsNumber = Math.round(moreDataResponse.data.metric.epsNormalizedAnnual * 100) / 100;
             let dividendYieldNumber = Math.round(moreDataResponse.data.metric.dividendYieldIndicatedAnnual * 100) / 100;
             let profitEarningNumber = Math.round(moreDataResponse.data.metric.peNormalizedAnnual * 100) / 100;
+            let betaNumber = Math.round(moreDataResponse.data.metric.beta * 100) / 100;
             if (changeDirection === "increase") {
                 overallChangeAmount += changeAmount;
             } else {
@@ -63,11 +64,12 @@ router.get('/:id', authentication, async function(req, res, next) {
                 eps: epsNumber,
                 dividendYield: dividendYieldNumber,
                 profitEarningRatio: profitEarningNumber,
+                betaValue: betaNumber,
             }
             stocks.push(info);
         };
         let overallChange;
-        if (overallChangeAmount > 0) {
+        if (overallChangeAmount >= 0) {
             overallChange = "increase"
         } else {
             overallChange = "decrease"
@@ -97,14 +99,14 @@ router.post('/new', authentication, async function(req, res, next) {
                 newListNumber = element.listNumber
             }
         })
-        newListNumber = listNumber + 1;
+        newListNumber = newListNumber + 1;
         const info = {
             name: req.body.listName,
             stocks: [],
             userId: req.user._id,
             listNumber: newListNumber
         }
-        const watchlistExists = await Watchlist.exists({name: req.body.name});
+        const watchlistExists = await Watchlist.exists({name: req.body.listName});
         if (watchlistExists) {
             res.send({requestStatus: false});
         } else {
@@ -112,7 +114,7 @@ router.post('/new', authentication, async function(req, res, next) {
             await newWatchlist.save();
             res.send({requestStatus: true});
         }
-    } catch {
+    } catch(error) {
         res.status(404).send({requestStatus: false});
     }
 });
