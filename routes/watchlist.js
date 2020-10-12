@@ -33,7 +33,7 @@ router.get('/:id', authentication, async function(req, res, next) {
             amountDifference = (Math.round(amountDifference * 100))/100
             let changeDirection = (response.data.c - response.data.o) > 0? "increase": "decrease";
             let moreDataResponse = await axios.get('https://finnhub.io/api/v1/stock/metric?symbol=' + stock + '&metric=all&token=btpsg2n48v6rdq37lt60');
-            let openDaily = Math.round(response.data.h * 100) / 100;
+            let openDaily = Math.round(response.data.o * 100) / 100;
             let highDaily = Math.round(response.data.h * 100) / 100;
             let lowDaily = Math.round(response.data.l * 100) / 100;
             let high52WeekPrice = Math.round(moreDataResponse.data.metric['52WeekHigh'] * 100) / 100;
