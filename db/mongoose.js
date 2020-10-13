@@ -46,7 +46,7 @@ const goalSchema = new Schema({
         required: true
     },
     goalType: {
-        trype: String,
+        type: String,
         required: true
     },
     description: {
@@ -95,7 +95,7 @@ const watchlistSchema = mongoose.Schema({
 });
 
 var users = mongoose.model('user', userSchema);
-var goalLists = mongoose.model('goalList', goalListSchema;
+var goalLists = mongoose.model('goalList', goalListSchema);
 var goals = mongoose.model('goal', goalSchema);
 var watchlists = mongoose.model('watchlist', watchlistSchema);
 
