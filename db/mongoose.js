@@ -25,6 +25,21 @@ const userSchema = new Schema({
     },
 });
 
+const goalListSchema = mongoose.Schema({
+    name: {
+        type: String,
+        required: true
+    },
+    userId: {
+        type: mongoose.Types.ObjectId,
+        required: true
+    },
+    listNumber: {
+        type: Number,
+        required: true
+    }
+});
+
 const goalSchema = new Schema({
     title: {
         type: String,
@@ -48,6 +63,10 @@ const goalSchema = new Schema({
     },
     validUntil: {
         type: String,
+        required: true
+    },
+    listNumber: {
+        type: Number,
         required: true
     },
     userId: {
@@ -75,18 +94,14 @@ const watchlistSchema = mongoose.Schema({
     }
 });
 
-userSchema.virtual('goals', {
-    ref: 'goal',
-    localField: '_id',
-    foreignField: 'userId'
-});
-
 var users = mongoose.model('user', userSchema);
+var goalLists = mongoose.model('goalList', goalListSchema;
 var goals = mongoose.model('goal', goalSchema);
 var watchlists = mongoose.model('watchlist', watchlistSchema);
 
 module.exports = {
     User: users,
+    GoalList: goalLists,
     Goal: goals,
     Watchlist: watchlists
 }
