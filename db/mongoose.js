@@ -30,6 +30,10 @@ const goalSchema = new Schema({
         type: String,
         required: true
     },
+    goalType: {
+        trype: String,
+        required: true
+    },
     description: {
         type: String,
         required: true
@@ -38,7 +42,7 @@ const goalSchema = new Schema({
         type: String,
         required: true
     },
-    goal: {
+    goalCondition: {
         type: Array,
         required: true
     },
