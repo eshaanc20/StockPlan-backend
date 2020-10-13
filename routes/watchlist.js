@@ -13,7 +13,7 @@ router.get('/all', authentication, async function(req, res, next) {
     try {
         const watchlists = await Watchlist.find({userId: req.user._id});
         const stockLists = [...watchlists]
-        res.send({allLists: stockLists});
+        res.send({allLists: stockLists, requestStatus: true});
     } catch {
         res.status(404).send({requestStatus: false});
     }

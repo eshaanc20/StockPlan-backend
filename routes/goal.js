@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 var {User} = require('../db/mongoose.js');
 var {Goal} = require('../db/mongoose.js');
+var {GoalList} = require('../db/mongoose.js');
 var bcrypt = require('bcryptjs');
 var jwt = require('jsonwebtoken');
 var authentication = require('../middleware/authentication.js');
@@ -9,8 +10,9 @@ var authentication = require('../middleware/authentication.js');
 //get all goal lists
 router.get('/list/all', authentication, async function(req, res, next) {
     try {
-        await req.user.populate('goals').execPopulate();
-        res.send(req.user.goals);
+        const goals = await GoalList.find({userId: req.user._id});
+        const goalLists = [...goals]
+        res.send({allLists: goalLists, requestStatus: true});
     } catch {
         res.status(404).send({requestStatus: false});
     }
@@ -19,10 +21,10 @@ router.get('/list/all', authentication, async function(req, res, next) {
 //create new goals list
 router.post('/new', authentication, async function(req, res, next) {
     try {
-        const watchlists = await Watchlist.find({userId: req.user._id});
-        const stockLists = [...watchlists]
+        const goals = await GoalList.find({userId: req.user._id})
+        const goalList = [...goals]
         let newListNumber = 0;
-        stockLists.forEach(element => {
+        goalList.forEach(element => {
             if (newListNumber < element.listNumber) {
                 newListNumber = element.listNumber
             }
@@ -30,16 +32,15 @@ router.post('/new', authentication, async function(req, res, next) {
         newListNumber = newListNumber + 1;
         const info = {
             name: req.body.listName,
-            stocks: [],
             userId: req.user._id,
             listNumber: newListNumber
         }
-        const watchlistExists = await Watchlist.exists({name: req.body.listName});
-        if (watchlistExists) {
+        const goalListExists = await GoalList.exists({name: req.body.listName});
+        if (goalListExists) {
             res.send({requestStatus: false});
         } else {
-            const newWatchlist = new Watchlist(info);
-            await newWatchlist.save();
+            const newGoalList = new GoalList(info);
+            await newGoalList.save();
             res.send({requestStatus: true});
         }
     } catch(error) {
