@@ -19,7 +19,7 @@ router.get('/list/all', authentication, async function(req, res, next) {
 });
 
 //create new goals list
-router.post('/new', authentication, async function(req, res, next) {
+router.post('/list/new', authentication, async function(req, res, next) {
     try {
         const goals = await GoalList.find({userId: req.user._id})
         const goalList = [...goals]
@@ -51,23 +51,60 @@ router.post('/new', authentication, async function(req, res, next) {
 //get all goals in list
 router.get('/list/:id', authentication, async function(req, res, next) {
     try {
-        const oneGoal = await Goal.findOne({_id: req.params.id});
-        return oneGoal;
+        const listInformation = await GoalList.findOne({listNumber: req.params.id, userId: req.user._id})
+        const goalsList = await Goal.find({listNumber: req.params.id, userId: req.user._id});
+        const listName = listInformation.name;
+        const goals = [...goalsList];
+        let goalsInformation = [];
+        for (goal of goals) {
+            let response = await axios.get('https://finnhub.io/api/v1/quote?symbol=' + goal.stock + '&token=btpsg2n48v6rdq37lt60');
+            let goalProgress = (100 - (Math.abs(response.data.c - Number(goal.goalTargetNumber)) / response.data.c))
+            goalProgress = Math.round(goalProgress * 100) / 100;
+            let goalComplete = false;
+            if (goalProgress === 100) {
+                goalComplete = true;
+            }
+            let goalInfo = {
+                title: goal.title,
+                goalType: goal.goalType,
+                description: goal.description,
+                stock: goal.stock,
+                goalParameter: goal.goalParameter,
+                goalTargetNumber: goal.goalTargetNumber,
+                validUntil: goal.validUntilDate,
+                goalCompleted: true,
+                goalCompletedDate: " ",
+                currentValue: response.data.c,
+                progress: goalProgress
+            }
+        }
+        res.send({requestStatus: true, name: listName, goalsDetail: goals});
     } catch {
         res.status(404).send({requestStatus: false});
     }
 });
 
-//add a new goal to list
+//add a new stock goal to list
 router.post('/list/:id', authentication, async function(req, res, next) {
     try {
         const goalInfo = {
-            ...req.body,
+            title: req.body.goalTitle,
+            goalType: req.body.goalType,
+            description: req.body.goalDescription,
+            stock: req.body.stockSymbol,
+            goalParameter: req.body.goalParameter,
+            goalTargetNumber: req.body.goalTargetNumber,
+            validUntil: req.body.validUntilDate,
+            goalCompleted: false,
+            goalCompletedDate: " ",
+            listNumber: req.params.id,
+            userId: req.user._id
         }
         const newGoal = new Goal(goalInfo);
         await newGoal.save()
         res.send({requestStatus: true});
-    } catch {
+    } catch(error) {
+        
         res.status(404).send({requestStatus: false});
     }
 });

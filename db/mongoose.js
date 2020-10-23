@@ -57,11 +57,23 @@ const goalSchema = new Schema({
         type: String,
         required: true
     },
-    goalCondition: {
-        type: Array,
+    goalParameter: {
+        type: String,
+        required: true
+    },
+    goalTargetNumber: {
+        type: String,
         required: true
     },
     validUntil: {
+        type: String,
+        required: true
+    },
+    goalCompleted: {
+        type: Boolean,
+        required: true
+    },
+    goalCompletedDate: {
         type: String,
         required: true
     },
