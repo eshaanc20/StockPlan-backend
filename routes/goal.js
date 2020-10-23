@@ -6,6 +6,7 @@ var {GoalList} = require('../db/mongoose.js');
 var bcrypt = require('bcryptjs');
 var jwt = require('jsonwebtoken');
 var authentication = require('../middleware/authentication.js');
+var axios = require('axios');
 
 //get all goal lists
 router.get('/list/all', authentication, async function(req, res, next) {
@@ -58,8 +59,13 @@ router.get('/list/:id', authentication, async function(req, res, next) {
         let goalsInformation = [];
         for (goal of goals) {
             let response = await axios.get('https://finnhub.io/api/v1/quote?symbol=' + goal.stock + '&token=btpsg2n48v6rdq37lt60');
-            let goalProgress = (100 - (Math.abs(response.data.c - Number(goal.goalTargetNumber)) / response.data.c))
-            goalProgress = Math.round(goalProgress * 100) / 100;
+            let goalProgress = (100 - ((Math.abs(response.data.c - Number(goal.goalTargetNumber)) / response.data.c) * 100))
+            goalProgress = Math.round(goalProgress);
+            if (goal.goalType == 'buy' && (response.data.c - Number(goal.goalTargetNumber) < 0)) {
+                goalProgress = 100;
+            } else if (goal.goalType == 'sell' && (response.data.c - Number(goal.goalTargetNumber) > 0)){
+                goalProgress = 100;
+            }
             let goalComplete = false;
             if (goalProgress === 100) {
                 goalComplete = true;
@@ -71,15 +77,16 @@ router.get('/list/:id', authentication, async function(req, res, next) {
                 stock: goal.stock,
                 goalParameter: goal.goalParameter,
                 goalTargetNumber: goal.goalTargetNumber,
-                validUntil: goal.validUntilDate,
-                goalCompleted: true,
+                validUntil: goal.validUntil,
+                goalCompleted: goalComplete,
                 goalCompletedDate: " ",
                 currentValue: response.data.c,
                 progress: goalProgress
             }
+            goalsInformation.push(goalInfo);
         }
-        res.send({requestStatus: true, name: listName, goalsDetail: goals});
-    } catch {
+        res.send({requestStatus: true, name: listName, goalsDetail: goalsInformation});
+    } catch(error) {
         res.status(404).send({requestStatus: false});
     }
 });
