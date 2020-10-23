@@ -9,7 +9,7 @@ var authentication = require('../middleware/authentication.js');
 var axios = require('axios');
 
 //get all user watchlists
-router.get('/all', authentication, async function(req, res, next) {
+router.get('/list/all', authentication, async function(req, res, next) {
     try {
         const watchlists = await Watchlist.find({userId: req.user._id});
         const stockLists = [...watchlists]
@@ -20,7 +20,7 @@ router.get('/all', authentication, async function(req, res, next) {
 });
 
 //get watchlist information
-router.get('/:id', authentication, async function(req, res, next) {
+router.get('/list/:id', authentication, async function(req, res, next) {
     try {
         const watchlist = await Watchlist.findOne({listNumber: parseInt(req.params.id), userId: req.user._id});
         let stocks = [];
@@ -89,7 +89,7 @@ router.get('/:id', authentication, async function(req, res, next) {
 });
 
 //create new watchlist
-router.post('/new', authentication, async function(req, res, next) {
+router.post('/list/new', authentication, async function(req, res, next) {
     try {
         const watchlists = await Watchlist.find({userId: req.user._id});
         const stockLists = [...watchlists]
@@ -120,7 +120,7 @@ router.post('/new', authentication, async function(req, res, next) {
 });
 
 //add to watchlist
-router.post('/:id', authentication, async function(req, res, next) {
+router.post('/list/:id', authentication, async function(req, res, next) {
     try {
         const list = await Watchlist.findOne({listNumber: req.params.id, userId: req.user._id});
         const stockList = [...list.stocks, req.body.stockSymbol];
@@ -132,7 +132,7 @@ router.post('/:id', authentication, async function(req, res, next) {
 });
 
 //delete a watchlist
-router.delete('/:id', authentication, async function(req, res, next) {
+router.delete('/list/:id', authentication, async function(req, res, next) {
     try {
         await Watchlist.deleteOne({listId: req.params.id});
         res.send({requestStatus: true});
