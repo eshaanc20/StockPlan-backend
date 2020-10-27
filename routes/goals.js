@@ -81,7 +81,8 @@ router.get('/list/:id', authentication, async function(req, res, next) {
                 goalCompleted: goalComplete,
                 goalCompletedDate: " ",
                 currentValue: response.data.c,
-                progress: goalProgress
+                progress: goalProgress,
+                goalId: goal._id
             }
             goalsInformation.push(goalInfo);
         }
@@ -116,10 +117,10 @@ router.post('/list/:id', authentication, async function(req, res, next) {
     }
 });
 
-//delete a goal list
-router.delete('/list/:id', authentication, async function(req, res, next) {
+//delete a goal from list
+router.delete('/:id', authentication, async function(req, res, next) {
     try {
-        await Goal.deleteOne({_id: req.body.id});
+        await Goal.deleteOne({_id: req.params.id});
         res.send({requestStatus: true});
     } catch {
         res.status(404).send({requestStatus: false});
