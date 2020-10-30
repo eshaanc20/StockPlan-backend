@@ -3,15 +3,16 @@ var router = express.Router();
 var {User} = require('../db/mongoose.js');
 var {Goal} = require('../db/mongoose.js');
 var {Portfolio} = require('../db/mongoose.js');
+var {GoalList} = require('../db/mongoose.js');
 var bcrypt = require('bcryptjs');
 var jwt = require('jsonwebtoken');
 var authentication = require('../middleware/authentication.js');
 var axios = require('axios');
 
-router.post('/', async function(req, res, next) {
+router.post('/', authentication, async function(req, res, next) {
     try {
         const info = {
-            symbol: req.body.symbol,
+            stock: req.body.stock,
             shares: req.body.shares,
             price: req.body.price,
             userId: req.user._id
@@ -19,25 +20,37 @@ router.post('/', async function(req, res, next) {
         const portfolio = new Portfolio(info);
         await portfolio.save();
         res.send({requestStatus: true});
-    } catch {
+    } catch(error) {
+        console.log(error)
         res.status(404).send({requestStatus: false});
     }
 });
 
-router.get('/', async function(req, res, next) {
+router.get('/', authentication, async function(req, res, next) {
     try {
-        const response = Portfolio.find({userId: req.user._id});
+        const response = await Portfolio.find({userId: req.user._id});
         const portfolioData = [...response];
         let portfolio = [];
         let stocks = []
+        let overallChangeAmount = 0;
         for (data of portfolioData) {
+            console.log("running")
             let response = await axios.get('https://finnhub.io/api/v1/quote?symbol=' + data.stock + '&token=btpsg2n48v6rdq37lt60');
-            const marketValue = response.data.c * data.shares
-            const bookValue = data.price * data.shares
+            const market = Math.round((response.data.c * data.shares) * 100) / 100
+            const bookValue = Math.round((data.price * data.shares) * 100) / 100
+            const amountChanged = Math.round((market - bookValue)*10000) / 100
+            const change = Math.round(Math.abs((market - bookValue))/bookValue * 100)
+            const direction = (market - bookValue) < 0? 'decrease': 'increase';
             portfolio.push({
-                ...data,
-                marketValue: marketValue,
-                bookValue: bookValue
+                stock: data.stock,
+                shares: data.shares,
+                price: data.price,
+                marketValue: market,
+                bookValue: bookValue,
+                changeAmount: amountChanged,
+                change: change,
+                changeDirection: direction,
+                id: data._id,
             })
             let changeAmount = (Math.abs(response.data.c - response.data.pc))/response.data.pc;
             changeAmount = (Math.round(changeAmount * 10000))/100
@@ -61,7 +74,7 @@ router.get('/', async function(req, res, next) {
                 overallChangeAmount -= changeAmount;
             }
             const info = {
-                symbol: stock,
+                symbol: data.stock,
                 current: response.data.c,
                 open: openDaily,
                 high: highDaily,
@@ -89,18 +102,19 @@ router.get('/', async function(req, res, next) {
         overallChangeAmount = Math.abs(overallChangeAmount);
         overallChangeAmount = (Math.round(overallChangeAmount * 100)) / 100
         const stockData = {
-            name: watchlist.name, 
+            name: "portfolio", 
             stockDetail: stocks, 
             totalChange: overallChange, 
             totalChangeAmount: overallChangeAmount,
-            length: watchlist.stocks.length
+            length: stocks.length
         }
-        const listInformation = await GoalList.findOne({listNumber: req.params.id, userId: req.user._id})
+        const listInformation = await GoalList.findOne({listNumber: 1, userId: req.user._id})
         const goalsList = await Goal.find({listNumber: req.params.id, userId: req.user._id});
         const listName = listInformation.name;
         const goals = [...goalsList];
         let goalsInformation = [];
         for (goal of goals) {
+            console.log("running")
             let response = await axios.get('https://finnhub.io/api/v1/quote?symbol=' + goal.stock + '&token=btpsg2n48v6rdq37lt60');
             let goalProgress = (100 - ((Math.abs(response.data.c - Number(goal.goalTargetNumber)) / response.data.c) * 100))
             goalProgress = Math.round(goalProgress);
@@ -129,9 +143,9 @@ router.get('/', async function(req, res, next) {
             }
             goalsInformation.push(goalInfo);
         }
-        res.send({requestStatus: true, name: listName, goalsDetail: goalsInformation});
         res.send({portfolio: portfolio, stocks: stockData, goals: goalsInformation, requestStatus: true});
-    } catch {
+    } catch(error) {
+        console.log(error)
         res.status(404).send({requestStatus: false});
     }
 });
