@@ -11,9 +11,19 @@ var axios = require('axios');
 //get all goal lists
 router.get('/list/all', authentication, async function(req, res, next) {
     try {
-        const goals = await GoalList.find({userId: req.user._id});
-        const goalLists = [...goals]
-        res.send({allLists: goalLists, requestStatus: true});
+        const response = await GoalList.find({userId: req.user._id});
+        let goalLists = [...response];
+        let updatedGoalLists = [];
+        for (goal of goalLists) {
+            const goals = await Goal.find({userId: req.user._id, listNumber: goal.listNumber});
+            const goalsArray = [...goals]
+            updatedGoalLists.push({
+                name: goal.name,
+                listNumber: goal.listNumber,
+                length: goalsArray.length
+            })
+        }
+        res.send({allLists: updatedGoalLists, requestStatus: true});
     } catch {
         res.status(404).send({requestStatus: false});
     }

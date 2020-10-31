@@ -34,12 +34,12 @@ router.get('/', authentication, async function(req, res, next) {
         let stocks = []
         let overallChangeAmount = 0;
         for (data of portfolioData) {
-            console.log("running")
+            console.log("running 1")
             let response = await axios.get('https://finnhub.io/api/v1/quote?symbol=' + data.stock + '&token=btpsg2n48v6rdq37lt60');
             const market = Math.round((response.data.c * data.shares) * 100) / 100
             const bookValue = Math.round((data.price * data.shares) * 100) / 100
-            const amountChanged = Math.round((market - bookValue)*10000) / 100
-            const change = Math.round(Math.abs((market - bookValue))/bookValue * 100)
+            const amountChanged = Math.round(Math.abs((market - bookValue))*100) / 100
+            const change = Math.round(Math.abs((market - bookValue))/bookValue * 10000) / 100
             const direction = (market - bookValue) < 0? 'decrease': 'increase';
             portfolio.push({
                 stock: data.stock,
@@ -108,13 +108,11 @@ router.get('/', authentication, async function(req, res, next) {
             totalChangeAmount: overallChangeAmount,
             length: stocks.length
         }
-        const listInformation = await GoalList.findOne({listNumber: 1, userId: req.user._id})
-        const goalsList = await Goal.find({listNumber: req.params.id, userId: req.user._id});
-        const listName = listInformation.name;
+        const goalsList = await Goal.find({listNumber: 1, userId: req.user._id});
         const goals = [...goalsList];
         let goalsInformation = [];
         for (goal of goals) {
-            console.log("running")
+            console.log("running 2")
             let response = await axios.get('https://finnhub.io/api/v1/quote?symbol=' + goal.stock + '&token=btpsg2n48v6rdq37lt60');
             let goalProgress = (100 - ((Math.abs(response.data.c - Number(goal.goalTargetNumber)) / response.data.c) * 100))
             goalProgress = Math.round(goalProgress);
