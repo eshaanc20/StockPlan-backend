@@ -8,6 +8,7 @@ var bcrypt = require('bcryptjs');
 var jwt = require('jsonwebtoken');
 var authentication = require('../middleware/authentication.js');
 var axios = require('axios');
+const e = require('express');
 
 router.post('/', authentication, async function(req, res, next) {
     try {
@@ -57,17 +58,6 @@ router.get('/', authentication, async function(req, res, next) {
             let amountDifference = Math.abs(response.data.c - response.data.pc);
             amountDifference = (Math.round(amountDifference * 100))/100
             let changeDirection = (response.data.c - response.data.o) > 0? "increase": "decrease";
-            let moreDataResponse = await axios.get('https://finnhub.io/api/v1/stock/metric?symbol=' + data.stock + '&metric=all&token=btpsg2n48v6rdq37lt60');
-            let openDaily = Math.round(response.data.o * 100) / 100;
-            let highDaily = Math.round(response.data.h * 100) / 100;
-            let lowDaily = Math.round(response.data.l * 100) / 100;
-            let high52WeekPrice = Math.round(moreDataResponse.data.metric['52WeekHigh'] * 100) / 100;
-            let low52WeekPrice = Math.round(moreDataResponse.data.metric['52WeekLow'] * 100) / 100;
-            let marketValue = moreDataResponse.data.metric.marketCapitalization / 1000;
-            let epsNumber = Math.round(moreDataResponse.data.metric.epsNormalizedAnnual * 100) / 100;
-            let dividendYieldNumber = Math.round(moreDataResponse.data.metric.dividendYieldIndicatedAnnual * 100) / 100;
-            let profitEarningNumber = Math.round(moreDataResponse.data.metric.peNormalizedAnnual * 100) / 100;
-            let betaNumber = Math.round(moreDataResponse.data.metric.beta * 100) / 100;
             if (changeDirection === "increase") {
                 overallChangeAmount += changeAmount;
             } else {
@@ -76,22 +66,37 @@ router.get('/', authentication, async function(req, res, next) {
             const info = {
                 symbol: data.stock,
                 current: response.data.c,
-                open: openDaily,
-                high: highDaily,
-                low: lowDaily,
-                previousClosePrice: response.data.pc,
                 change: changeDirection,
                 percentChange: changeAmount,
                 amountChange: amountDifference,
-                high52Week: high52WeekPrice,
-                low52Week: low52WeekPrice,
-                marketCap: marketValue,
-                eps: epsNumber,
-                dividendYield: dividendYieldNumber,
-                profitEarningRatio: profitEarningNumber,
-                betaValue: betaNumber,
             }
             stocks.push(info);
+        }
+        let totalBookValue = 0;
+        let totalMarketValue = 0;
+        let totalChangeAmount = 0;
+        let totalChange = 0;
+        for (let element of portfolio) {
+            if (element.changeDirection == "increase") {
+                totalBookValue += element.bookValue;
+                totalMarketValue += element.marketValue;
+                totalChangeAmount += element.changeAmount;
+                totalChange += element.change;
+            } else {
+                totalBookValue -= element.bookValue;
+                totalMarketValue -= element.marketValue;
+                totalChangeAmount -= element.changeAmount;
+                totalChange -= element.change;
+            }
+        }
+        let totalChangeDirection = totalChange < 0? "decrease": "increase";
+        const portfolioData = {
+            stockDetail: portfolio,
+            totalBookValue: totalBookValue,
+            totalMarketValue: totalMarketValue,
+            totalChangeAmount: totalChangeAmount,
+            totalChange: totalChange,
+            totalChangeDirection: totalChangeDirection
         }
         let overallChange;
         if (overallChangeAmount >= 0) {
