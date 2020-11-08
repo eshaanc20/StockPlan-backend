@@ -65,6 +65,7 @@ router.get('/list/:id', authentication, async function(req, res, next) {
                 dividendYield: dividendYieldNumber,
                 profitEarningRatio: profitEarningNumber,
                 betaValue: betaNumber,
+                id: stock._id
             }
             stocks.push(info);
         };

@@ -129,9 +129,17 @@ router.get('/', authentication, async function(req, res, next) {
         }
         res.send({portfolio: portfolioData, stocks: stockData, goals: goalsData, requestStatus: true});
     } catch(error) {
-        console.log(error)
         res.status(404).send({requestStatus: false});
     }
 });
+
+router.delete("/:id", authentication, async function(req, res, next) {
+    try {
+        await Portfolio.findOne({_id: req.params.id});
+        res.send({requestStatus: true});
+    } catch(error) {
+        res.status(404).send({requestStatus: false});
+    }
+})
 
 module.exports = router;
