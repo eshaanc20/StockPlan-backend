@@ -30,11 +30,11 @@ router.post('/', authentication, async function(req, res, next) {
 router.get('/', authentication, async function(req, res, next) {
     try {
         const response = await Portfolio.find({userId: req.user._id});
-        const portfolioData = [...response];
+        let portfolioList = [...response];
         let portfolio = [];
         let stocks = []
         let overallChangeAmount = 0;
-        for (data of portfolioData) {
+        for (data of portfolioList) {
             console.log("running 1")
             let response = await axios.get('https://finnhub.io/api/v1/quote?symbol=' + data.stock + '&token=btpsg2n48v6rdq37lt60');
             const market = Math.round((response.data.c * data.shares) * 100) / 100
@@ -89,9 +89,13 @@ router.get('/', authentication, async function(req, res, next) {
                 totalChange -= element.change;
             }
         }
+        totalBookValue = Math.round(totalBookValue * 100) / 100
+        totalMarketValue = Math.round(totalMarketValue * 100) / 100
+        totalChangeAmount = Math.round(totalChangeAmount* 100) / 100
+        totalChange = Math.round(totalChange * 100) / 100
         let totalChangeDirection = totalChange < 0? "decrease": "increase";
         const portfolioData = {
-            stockDetail: portfolio,
+            stocksDetail: portfolio,
             totalBookValue: totalBookValue,
             totalMarketValue: totalMarketValue,
             totalChangeAmount: totalChangeAmount,
@@ -115,7 +119,7 @@ router.get('/', authentication, async function(req, res, next) {
         }
         const goalsList = await Goal.find({listNumber: 1, userId: req.user._id});
         const goals = [...goalsList];
-        let goalsInformation = [];
+        let goalsData = [];
         for (goal of goals) {
             console.log("running 2")
             let response = await axios.get('https://finnhub.io/api/v1/quote?symbol=' + goal.stock + '&token=btpsg2n48v6rdq37lt60');
@@ -144,9 +148,9 @@ router.get('/', authentication, async function(req, res, next) {
                 progress: goalProgress,
                 goalId: goal._id
             }
-            goalsInformation.push(goalInfo);
+            goalsData.push(goalInfo);
         }
-        res.send({portfolio: portfolio, stocks: stockData, goals: goalsInformation, requestStatus: true});
+        res.send({portfolio: portfolioData, stocks: stockData, goals: goalsData, requestStatus: true});
     } catch(error) {
         console.log(error)
         res.status(404).send({requestStatus: false});
