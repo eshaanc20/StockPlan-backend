@@ -35,7 +35,6 @@ router.get('/', authentication, async function(req, res, next) {
         let stocks = []
         let overallChangeAmount = 0;
         for (data of portfolioList) {
-            console.log("running 1")
             let response = await axios.get('https://finnhub.io/api/v1/quote?symbol=' + data.stock + '&token=btpsg2n48v6rdq37lt60');
             const market = Math.round((response.data.c * data.shares) * 100) / 100
             const bookValue = Math.round((data.price * data.shares) * 100) / 100
@@ -57,12 +56,7 @@ router.get('/', authentication, async function(req, res, next) {
             changeAmount = (Math.round(changeAmount * 10000))/100
             let amountDifference = Math.abs(response.data.c - response.data.pc);
             amountDifference = (Math.round(amountDifference * 100))/100
-            let changeDirection = (response.data.c - response.data.o) > 0? "increase": "decrease";
-            if (changeDirection === "increase") {
-                overallChangeAmount += changeAmount;
-            } else {
-                overallChangeAmount -= changeAmount;
-            }
+            const changeDirection = response.data.c < response.data.o? "decrease": "increase";
             const info = {
                 symbol: data.stock,
                 current: response.data.c,
@@ -74,26 +68,15 @@ router.get('/', authentication, async function(req, res, next) {
         }
         let totalBookValue = 0;
         let totalMarketValue = 0;
-        let totalChangeAmount = 0;
-        let totalChange = 0;
         for (let element of portfolio) {
-            if (element.changeDirection == "increase") {
-                totalBookValue += element.bookValue;
-                totalMarketValue += element.marketValue;
-                totalChangeAmount += element.changeAmount;
-                totalChange += element.change;
-            } else {
-                totalBookValue -= element.bookValue;
-                totalMarketValue -= element.marketValue;
-                totalChangeAmount -= element.changeAmount;
-                totalChange -= element.change;
-            }
+            totalBookValue += element.bookValue;
+            totalMarketValue += element.marketValue;
         }
-        totalBookValue = Math.round(totalBookValue * 100) / 100
-        totalMarketValue = Math.round(totalMarketValue * 100) / 100
-        totalChangeAmount = Math.round(totalChangeAmount* 100) / 100
-        totalChange = Math.round(totalChange * 100) / 100
-        let totalChangeDirection = totalChange < 0? "decrease": "increase";
+        totalBookValue = Math.round(totalBookValue * 100) / 100;
+        totalMarketValue = Math.round(totalMarketValue * 100) / 100;
+        let totalChangeAmount = Math.round(Math.abs(totalMarketValue - totalBookValue) * 100) / 100;
+        let totalChange = Math.round((Math.abs(totalMarketValue - totalBookValue))/totalBookValue * 10000) / 100
+        const totalChangeDirection = totalMarketValue < totalBookValue? "decrease": "increase";
         const portfolioData = {
             stocksDetail: portfolio,
             totalBookValue: totalBookValue,
@@ -102,17 +85,12 @@ router.get('/', authentication, async function(req, res, next) {
             totalChange: totalChange,
             totalChangeDirection: totalChangeDirection
         }
-        let overallChange;
-        if (overallChangeAmount >= 0) {
-            overallChange = "increase"
-        } else {
-            overallChange = "decrease"
-        }
+        const overallChange = overallChangeAmount >= 0? "increase": "decrease"
         overallChangeAmount = Math.abs(overallChangeAmount);
         overallChangeAmount = (Math.round(overallChangeAmount * 100)) / 100
         const stockData = {
             name: "portfolio", 
-            stockDetail: stocks, 
+            stocksDetail: stocks, 
             totalChange: overallChange, 
             totalChangeAmount: overallChangeAmount,
             length: stocks.length
