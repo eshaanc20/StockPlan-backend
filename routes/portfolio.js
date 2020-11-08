@@ -99,7 +99,6 @@ router.get('/', authentication, async function(req, res, next) {
         const goals = [...goalsList];
         let goalsData = [];
         for (goal of goals) {
-            console.log("running 2")
             let response = await axios.get('https://finnhub.io/api/v1/quote?symbol=' + goal.stock + '&token=btpsg2n48v6rdq37lt60');
             let goalProgress = (100 - ((Math.abs(response.data.c - Number(goal.goalTargetNumber)) / response.data.c) * 100))
             goalProgress = Math.round(goalProgress);
