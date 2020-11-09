@@ -135,7 +135,7 @@ router.get('/', authentication, async function(req, res, next) {
 
 router.delete("/:id", authentication, async function(req, res, next) {
     try {
-        await Portfolio.findOne({_id: req.params.id});
+        await Portfolio.deleteOne({_id: req.params.id});
         res.send({requestStatus: true});
     } catch(error) {
         res.status(404).send({requestStatus: false});
