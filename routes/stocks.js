@@ -48,9 +48,10 @@ router.get('/list/:id', authentication, async function(req, res, next) {
             } else {
                 overallChangeAmount -= changeAmount;
             }
+            const currentPrice = Math.round(response.data.c * 100) / 100;
             const info = {
                 symbol: stock,
-                current: response.data.c,
+                current: currentPrice,
                 open: openDaily,
                 high: highDaily,
                 low: lowDaily,
@@ -84,7 +85,6 @@ router.get('/list/:id', authentication, async function(req, res, next) {
             totalChangeAmount: overallChangeAmount,
             length: watchlist.stocks.length});
     } catch (error) {
-        console.log(error);
         res.status(404).send({requestStatus: false});
     }
 });

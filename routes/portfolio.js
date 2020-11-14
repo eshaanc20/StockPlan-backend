@@ -22,7 +22,6 @@ router.post('/', authentication, async function(req, res, next) {
         await portfolio.save();
         res.send({requestStatus: true});
     } catch(error) {
-        console.log(error)
         res.status(404).send({requestStatus: false});
     }
 });
@@ -57,9 +56,10 @@ router.get('/', authentication, async function(req, res, next) {
             let amountDifference = Math.abs(response.data.c - response.data.pc);
             amountDifference = (Math.round(amountDifference * 100))/100
             const changeDirection = response.data.c < response.data.o? "decrease": "increase";
+            const currentPrice = Math.round(response.data.c * 100) / 100;
             const info = {
                 symbol: data.stock,
-                current: response.data.c,
+                current: currentPrice,
                 change: changeDirection,
                 percentChange: changeAmount,
                 amountChange: amountDifference,
@@ -111,6 +111,7 @@ router.get('/', authentication, async function(req, res, next) {
             if (goalProgress === 100) {
                 goalComplete = true;
             }
+            const currentPrice = Math.round(response.data.c * 100) / 100;
             let goalInfo = {
                 title: goal.title,
                 goalType: goal.goalType,
@@ -121,7 +122,7 @@ router.get('/', authentication, async function(req, res, next) {
                 validUntil: goal.validUntil,
                 goalCompleted: goalComplete,
                 goalCompletedDate: " ",
-                currentValue: response.data.c,
+                currentValue: currentPrice,
                 progress: goalProgress,
                 goalId: goal._id
             }
