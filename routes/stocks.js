@@ -48,9 +48,10 @@ router.get('/list/:id', authentication, async function(req, res, next) {
             } else {
                 overallChangeAmount -= changeAmount;
             }
+            const currentPrice = Math.round(response.data.c * 100) / 100;
             const info = {
                 symbol: stock,
-                current: response.data.c,
+                current: currentPrice,
                 open: openDaily,
                 high: highDaily,
                 low: lowDaily,
@@ -78,12 +79,12 @@ router.get('/list/:id', authentication, async function(req, res, next) {
         overallChangeAmount = (Math.round(overallChangeAmount * 100)) / 100
         res.send({
             name: watchlist.name, 
+            id: watchlist.id,
             stockDetail: stocks, 
             totalChange: overallChange, 
             totalChangeAmount: overallChangeAmount,
             length: watchlist.stocks.length});
     } catch (error) {
-        console.log(error);
         res.status(404).send({requestStatus: false});
     }
 });
@@ -124,7 +125,7 @@ router.post('/list/:id', authentication, async function(req, res, next) {
     try {
         const list = await Watchlist.findOne({listNumber: req.params.id, userId: req.user._id});
         const stockList = [...list.stocks, req.body.stockSymbol];
-        const newList = await Watchlist.updateOne({listNumber: req.params.id, userId: req.user._id}, {stocks: stockList});
+        await Watchlist.updateOne({listNumber: req.params.id, userId: req.user._id}, {stocks: stockList});
         res.send({requestStatus: true});
     } catch {
         res.status(404).send({requestStatus: false});
@@ -137,6 +138,22 @@ router.delete('/list/:id', authentication, async function(req, res, next) {
         await Watchlist.deleteOne({listId: req.params.id});
         res.send({requestStatus: true});
     } catch {
+        res.status(404).send({requestStatus: false});
+    }
+});
+
+//delete a stock from list
+router.delete('/list/:id/:symbol', authentication, async function(req, res, next) {
+    try {
+        const list = await Watchlist.findOne({listNumber: req.params.id, userId: req.user._id});
+        let newStocks = [...list.stocks];
+        newStocks = newStocks.filter(stock => {
+            return stock != req.params.symbol
+        })
+        await Watchlist.updateOne({listNumber: req.params.id, userId: req.user._id}, {stocks: newStocks})
+        res.send({requestStatus: true});
+    } catch(error) {
+        console.log(error)
         res.status(404).send({requestStatus: false});
     }
 });

@@ -106,14 +106,36 @@ const watchlistSchema = mongoose.Schema({
     }
 });
 
+const portfolioSchema = mongoose.Schema({
+    stock: {
+        type: String,
+        required: true
+    },
+    shares: {
+        type: Array,
+        required: true
+    },
+    price: {
+        type: Number,
+        required: true
+    },
+    userId: {
+        type: mongoose.Types.ObjectId,
+        required: true
+    },
+});
+
+
 var users = mongoose.model('user', userSchema);
 var goalLists = mongoose.model('goalList', goalListSchema);
 var goals = mongoose.model('goal', goalSchema);
 var watchlists = mongoose.model('watchlist', watchlistSchema);
+var portfolio = mongoose.model('portfolio', portfolioSchema);
 
 module.exports = {
     User: users,
     GoalList: goalLists,
     Goal: goals,
-    Watchlist: watchlists
+    Watchlist: watchlists,
+    Portfolio: portfolio
 }

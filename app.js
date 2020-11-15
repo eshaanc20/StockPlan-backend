@@ -9,6 +9,7 @@ var indexRouter = require('./routes/index');
 var userRouter = require('./routes/user');
 var goalRouter = require('./routes/goals');
 var watchlistRouter = require('./routes/stocks');
+var portfolioRouter = require('./routes/portfolio');
 
 var app = express();
 
@@ -27,6 +28,7 @@ app.use('/', indexRouter);
 app.use('/user', userRouter);
 app.use('/goals', goalRouter);
 app.use('/stocks', watchlistRouter);
+app.use('/portfolio', portfolioRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

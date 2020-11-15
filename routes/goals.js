@@ -11,9 +11,19 @@ var axios = require('axios');
 //get all goal lists
 router.get('/list/all', authentication, async function(req, res, next) {
     try {
-        const goals = await GoalList.find({userId: req.user._id});
-        const goalLists = [...goals]
-        res.send({allLists: goalLists, requestStatus: true});
+        const response = await GoalList.find({userId: req.user._id});
+        let goalLists = [...response];
+        let updatedGoalLists = [];
+        for (goalList of goalLists) {
+            const goals = await Goal.find({userId: req.user._id, listNumber: goalList.listNumber});
+            const goalsArray = [...goals]
+            updatedGoalLists.push({
+                name: goalList.name,
+                listNumber: goalList.listNumber,
+                length: goalsArray.length
+            })
+        }
+        res.send({allLists: updatedGoalLists, requestStatus: true});
     } catch {
         res.status(404).send({requestStatus: false});
     }
@@ -70,6 +80,7 @@ router.get('/list/:id', authentication, async function(req, res, next) {
             if (goalProgress === 100) {
                 goalComplete = true;
             }
+            const currentPrice = Math.round(response.data.c * 100) / 100;
             let goalInfo = {
                 title: goal.title,
                 goalType: goal.goalType,
@@ -80,9 +91,9 @@ router.get('/list/:id', authentication, async function(req, res, next) {
                 validUntil: goal.validUntil,
                 goalCompleted: goalComplete,
                 goalCompletedDate: " ",
-                currentValue: response.data.c,
+                currentValue: currentPrice,
                 progress: goalProgress,
-                goalId: goal._id
+                id: goal._id
             }
             goalsInformation.push(goalInfo);
         }
@@ -112,7 +123,6 @@ router.post('/list/:id', authentication, async function(req, res, next) {
         await newGoal.save()
         res.send({requestStatus: true});
     } catch(error) {
-        
         res.status(404).send({requestStatus: false});
     }
 });
