@@ -123,7 +123,6 @@ router.post('/list/:id', authentication, async function(req, res, next) {
         await newGoal.save()
         res.send({requestStatus: true});
     } catch(error) {
-        
         res.status(404).send({requestStatus: false});
     }
 });
