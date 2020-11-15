@@ -93,7 +93,7 @@ router.get('/list/:id', authentication, async function(req, res, next) {
                 goalCompletedDate: " ",
                 currentValue: currentPrice,
                 progress: goalProgress,
-                goalId: goal._id
+                id: goal._id
             }
             goalsInformation.push(goalInfo);
         }
