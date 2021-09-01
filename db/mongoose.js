@@ -111,8 +111,8 @@ const portfolioSchema = mongoose.Schema({
         type: String,
         required: true
     },
-    shares: {
-        type: Array,
+    quantity: {
+        type: Number,
         required: true
     },
     price: {
