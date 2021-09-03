@@ -22,7 +22,7 @@ const userSchema = new Schema({
     password: {
         type: String,
         required: true,
-    },
+    }
 });
 
 const goalListSchema = mongoose.Schema({
@@ -77,6 +77,10 @@ const goalSchema = new Schema({
         type: String,
         required: true
     },
+    read: {
+        type: Boolean,
+        required: true
+    },
     listNumber: {
         type: Number,
         required: true
@@ -122,7 +126,7 @@ const portfolioSchema = mongoose.Schema({
     userId: {
         type: mongoose.Types.ObjectId,
         required: true
-    },
+    }
 });
 
 
