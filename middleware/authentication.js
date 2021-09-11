@@ -11,7 +11,7 @@ const authentication = async function (req, res, next) {
         req.user = user;
         next();
     } catch(e) {
-        res.status(401).send('Error')
+        res.status(401).send('Token not found')
     }
 }
 

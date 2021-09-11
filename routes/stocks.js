@@ -153,7 +153,6 @@ router.delete('/list/:id/:symbol', authentication, async function(req, res, next
         await Watchlist.updateOne({listNumber: req.params.id, userId: req.user._id}, {stocks: newStocks})
         res.send({requestStatus: true});
     } catch(error) {
-        console.log(error)
         res.status(404).send({requestStatus: false});
     }
 });

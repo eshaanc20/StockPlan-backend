@@ -129,10 +129,21 @@ router.post('/list/:id', authentication, async function(req, res, next) {
     }
 });
 
+//read completed goal
+router.put('/:id/read', authentication, async function(req, res, next) {
+    try {
+        await Goal.updateOne({_id: req.params.id, userId: req.user._id}, {read: true});
+        res.send({requestStatus: true});
+    } catch(error) {
+        console.log(error);
+        res.status(404).send({requestStatus: false});
+    }
+});
+
 //delete a goal from list
 router.delete('/:id', authentication, async function(req, res, next) {
     try {
-        await Goal.deleteOne({_id: req.params.id});
+        await Goal.deleteOne({_id: req.params.id, userId: req.user._id});
         res.send({requestStatus: true});
     } catch {
         res.status(404).send({requestStatus: false});
