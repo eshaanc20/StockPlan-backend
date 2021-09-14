@@ -10,7 +10,7 @@ router.post('/login', async function(req, res, next) {
         const user = await User.findOne({email: req.body.email});
         const passwordMatch = await bcrypt.compare(req.body.password, user.password);
         if (passwordMatch) {
-            const new_token = jwt.sign({'id': user._id}, 'stockplanbackend', { expiresIn: 3600 });
+            const new_token = jwt.sign({'id': user._id}, process.env.application_key_1, { expiresIn: 3600 });
             res.status(200).send({
                 firstName: user.firstName, 
                 lastName: user.lastName,

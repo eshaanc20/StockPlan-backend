@@ -1,7 +1,7 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
-mongoose.connect('mongodb://127.0.0.1:27017/StockPlan', {
+mongoose.connect(process.env.mongodb_URL, {
     useNewUrlParser: true,
     useUnifiedTopology: true
 });
@@ -133,7 +133,7 @@ const portfolioSchema = mongoose.Schema({
 var users = mongoose.model('user', userSchema);
 var goalLists = mongoose.model('goalList', goalListSchema);
 var goals = mongoose.model('goal', goalSchema);
-var watchlists = mongoose.model('watchlist', watchlistSchema);
+var watchlists = mongoose.model('stocklist', watchlistSchema);
 var portfolio = mongoose.model('portfolio', portfolioSchema);
 
 module.exports = {
