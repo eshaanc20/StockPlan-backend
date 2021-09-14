@@ -1,7 +1,7 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
-mongoose.connect('mongodb://127.0.0.1:27017/StockPlan', {
+mongoose.connect(process.env.mongodb_URL, {
     useNewUrlParser: true,
     useUnifiedTopology: true
 });
@@ -22,7 +22,7 @@ const userSchema = new Schema({
     password: {
         type: String,
         required: true,
-    },
+    }
 });
 
 const goalListSchema = mongoose.Schema({
@@ -77,6 +77,10 @@ const goalSchema = new Schema({
         type: String,
         required: true
     },
+    read: {
+        type: Boolean,
+        required: true
+    },
     listNumber: {
         type: Number,
         required: true
@@ -111,8 +115,8 @@ const portfolioSchema = mongoose.Schema({
         type: String,
         required: true
     },
-    shares: {
-        type: Array,
+    quantity: {
+        type: Number,
         required: true
     },
     price: {
@@ -122,14 +126,14 @@ const portfolioSchema = mongoose.Schema({
     userId: {
         type: mongoose.Types.ObjectId,
         required: true
-    },
+    }
 });
 
 
 var users = mongoose.model('user', userSchema);
 var goalLists = mongoose.model('goalList', goalListSchema);
 var goals = mongoose.model('goal', goalSchema);
-var watchlists = mongoose.model('watchlist', watchlistSchema);
+var watchlists = mongoose.model('stocklist', watchlistSchema);
 var portfolio = mongoose.model('portfolio', portfolioSchema);
 
 module.exports = {

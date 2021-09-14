@@ -8,13 +8,12 @@ var bcrypt = require('bcryptjs');
 var jwt = require('jsonwebtoken');
 var authentication = require('../middleware/authentication.js');
 var axios = require('axios');
-const e = require('express');
 
 router.post('/', authentication, async function(req, res, next) {
     try {
         const info = {
             stock: req.body.stock,
-            shares: req.body.shares,
+            quantity: req.body.quantity,
             price: req.body.price,
             userId: req.user._id
         }
@@ -35,14 +34,14 @@ router.get('/', authentication, async function(req, res, next) {
         let overallChangeAmount = 0;
         for (data of portfolioList) {
             let response = await axios.get('https://finnhub.io/api/v1/quote?symbol=' + data.stock + '&token=btpsg2n48v6rdq37lt60');
-            const market = Math.round((response.data.c * data.shares) * 100) / 100
-            const bookValue = Math.round((data.price * data.shares) * 100) / 100
+            const market = Math.round((response.data.c * data.quantity) * 100) / 100
+            const bookValue = Math.round((data.price * data.quantity) * 100) / 100
             const amountChanged = Math.round(Math.abs((market - bookValue))*100) / 100
             const change = Math.round(Math.abs((market - bookValue))/bookValue * 10000) / 100
             const direction = (market - bookValue) < 0? 'decrease': 'increase';
             portfolio.push({
                 stock: data.stock,
-                shares: data.shares,
+                quantity: data.quantity,
                 price: data.price,
                 marketValue: market,
                 bookValue: bookValue,
