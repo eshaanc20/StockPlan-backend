@@ -8,3 +8,5 @@ StockPlan application URL: https://stockplanapp.firebaseapp.com
 
 ## Implementation
 This back-end REST API is created using Node.js and Express.js. The back-end processes data, runs calculations and manages a MongoDB database. The financial data for stocks is retreived from the Finnhub API.
+
+Front-end for this application can be found at this repository: https://github.com/eshaanc20/StockPlan
