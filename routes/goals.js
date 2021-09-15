@@ -68,7 +68,7 @@ router.get('/list/:id', authentication, async function(req, res, next) {
         const goals = [...goalsList];
         let goalsInformation = [];
         for (goal of goals) {
-            let response = await axios.get('https://finnhub.io/api/v1/quote?symbol=' + goal.stock + '&token=' + process.env.api_key_1);
+            let response = await axios.get('https://finnhub.io/api/v1/quote?symbol=' + goal.stock + '&token=' + process.env.api_key_token);
             let goalProgress = 100 - ((Math.abs(response.data.c - Number(goal.goalTargetNumber)) / response.data.c) * 100);
             goalProgress = Math.round(goalProgress);
             if (goal.goalType == 'buy' && ((response.data.c - Number(goal.goalTargetNumber)) < 0)) {

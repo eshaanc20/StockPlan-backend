@@ -33,7 +33,7 @@ router.get('/', authentication, async function(req, res, next) {
         let stocks = []
         let overallChangeAmount = 0;
         for (data of portfolioList) {
-            let response = await axios.get('https://finnhub.io/api/v1/quote?symbol=' + data.stock + '&token=' + process.env.api_key_1);
+            let response = await axios.get('https://finnhub.io/api/v1/quote?symbol=' + data.stock + '&token=' + process.env.api_key_token);
             const market = Math.round((response.data.c * data.quantity) * 100) / 100
             const bookValue = Math.round((data.price * data.quantity) * 100) / 100
             const amountChanged = Math.round(Math.abs((market - bookValue))*100) / 100
@@ -98,7 +98,7 @@ router.get('/', authentication, async function(req, res, next) {
         const goals = [...goalsList];
         let goalsData = [];
         for (goal of goals) {
-            let response = await axios.get('https://finnhub.io/api/v1/quote?symbol=' + goal.stock + '&token=' + process.env.api_key_1);
+            let response = await axios.get('https://finnhub.io/api/v1/quote?symbol=' + goal.stock + '&token=' + process.env.api_key_token);
             let goalProgress = (100 - ((Math.abs(response.data.c - Number(goal.goalTargetNumber)) / response.data.c) * 100))
             goalProgress = Math.round(goalProgress);
             if (goal.goalType == 'buy' && ((response.data.c - Number(goal.goalTargetNumber)) < 0)) {
