@@ -44,7 +44,7 @@ router.post('/new', async function(req, res, next) {
 
 router.post("/verify-token", async function(req, res, next) {
     try {
-        const tokenInfo = jwt.verify(req.body.token, 'stockplanbackend');
+        const tokenInfo = jwt.verify(req.body.token, process.env.application_key_1);
         const user = await User.findOne({_id: tokenInfo.id});
         res.send({
             firstName: user.firstName, 
