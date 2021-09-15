@@ -6,7 +6,7 @@ var jwt = require('jsonwebtoken');
 const authentication = async function (req, res, next) {
     try {
         const token = req.header('authentication').replace('Bearer ', '');
-        const tokenInfo = jwt.verify(token, 'stockplanbackend');
+        const tokenInfo = jwt.verify(token, process.env.application_key_1);
         const user = await User.findOne({_id: tokenInfo.id});
         req.user = user;
         next();
