@@ -26,13 +26,13 @@ router.get('/list/:id', authentication, async function(req, res, next) {
         let stocks = [];
         let overallChangeAmount = 0;
         for (stock of watchlist.stocks) {   
-            let response = await axios.get('https://finnhub.io/api/v1/quote?symbol=' + stock + '&token=btpsg2n48v6rdq37lt60');
+            let response = await axios.get('https://finnhub.io/api/v1/quote?symbol=' + stock + '&token=' + process.env.api_key_1);
             let changeAmount = (Math.abs(response.data.c - response.data.pc))/response.data.pc;
             changeAmount = (Math.round(changeAmount * 10000))/100
             let amountDifference = Math.abs(response.data.c - response.data.pc);
             amountDifference = (Math.round(amountDifference * 100))/100
             let changeDirection = (response.data.c - response.data.o) > 0? "increase": "decrease";
-            let moreDataResponse = await axios.get('https://finnhub.io/api/v1/stock/metric?symbol=' + stock + '&metric=all&token=btpsg2n48v6rdq37lt60');
+            let moreDataResponse = await axios.get('https://finnhub.io/api/v1/stock/metric?symbol=' + stock + '&token=' + process.env.api_key_1);
             let openDaily = Math.round(response.data.o * 100) / 100;
             let highDaily = Math.round(response.data.h * 100) / 100;
             let lowDaily = Math.round(response.data.l * 100) / 100;
